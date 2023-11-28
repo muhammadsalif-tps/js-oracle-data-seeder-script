@@ -1,64 +1,62 @@
 const oracledb = require('oracledb');
-require('dotenv').config()
+require('dotenv').config();
 
-async function insertData(dbInstance) {
+let dbInstance = null
+const dbConfig = {
+  user: process.env.ORACLE_USERNAME,
+  password: process.env.ORACLE_PASSWORD,
+  connectString: process.env.ORACLE_CONNECTION_STRING,
+};
+
+oracledb.getConnection(dbConfig).then((_db) => {
+  dbInstance = _db;
+  start();
+});
+
+const processData = () => {
+  const inputData = {
+    transactions: 1111,
+    day: "11/11/2023 00:00:00",
+    channel: "9999",
+  };
+  const sql = `INSERT INTO IRIS_CUSTOM.CHANNEL_WISE_TRANSACTION_DAY (TRANSACTIONS, DAY, CHANNEL) VALUES (:transactions, TO_DATE(:day, 'MM/DD/YYYY HH24:MI:SS'), :channel)`;
+  const binds = { ...inputData };
+  return dbInstance.execute(sql, binds, { autoCommit: true });
+}
+
+async function middleFunction(array = [], maxRequest = 2, failedRequests = []) {
   try {
-    // Sample data to be inserted
-    const inputData = {
-      transactions: 1111,
-      day: "11/11/2023 00:00:00",
-      channel: "9999",
-    };
+    const _array = array.splice(0, maxRequest);
+    const _promises = _array.map((_data, ind) => {
+      return processData().catch((e) => {
+        failedRequests.push({
+          // dbInstance: userSetting._id.toString(),
+          index: ind,
+          error: e,
+        });
+      });
+    });
+    const result = await Promise.all(_promises);
+    console.log("result", result);
 
-    // SQL statement for inserting data
+    if (array && array.length) {
+      await middleFunction(array, maxRequest, failedRequests);
+    }
 
-    const sql = `INSERT INTO IRIS_CUSTOM.CHANNEL_WISE_TRANSACTION_DAY (TRANSACTIONS, DAY, CHANNEL) VALUES (:transactions, TO_DATE(:day, 'MM/DD/YYYY HH24:MI:SS'), :channel)`;
-
-    // Bind parameters
-    const binds = { ...inputData };
-
-    // Execute the SQL statement
-    const result = await dbInstance.execute(sql, binds, { autoCommit: true });
-
-    console.log('Data inserted successfully:', result.rowsAffected);
+    return Promise.resolve(failedRequests);
   } catch (error) {
     console.error('Error inserting data:', error);
   }
 }
 
-const closeDbConnection = async (dbInstance) => {
-  // Release the dbInstance
-  try {
-    await dbInstance.close();
-  } catch (error) {
-    console.error('Error closing dbInstance:', error);
-  }
-}
-
-const createDbConnection = async () => {
-  // Oracle DB connection parameters
-  const dbConfig = {
-    user: process.env.ORACLE_USERNAME,
-    password: process.env.ORACLE_PASSWORD,
-    connectString: process.env.ORACLE_CONNECTION_STRING,
-  };
-  // Connect to the Oracle Database
-  let connection = null;
-  try {
-    connection = await oracledb.getConnection(dbConfig);
-  } catch (error) {
-    console.log(error)
-  }
-  return connection;
-}
-
 const start = async () => {
-  const dbInstance = await createDbConnection();
-  if (dbInstance) {
-    await insertData(dbInstance);
-    await closeDbConnection(dbInstance);
+  if (!dbInstance) {
+    console.log("Connection to db failed");
+    return Promise.resolve();
   }
+  const _temp = new Array(7).fill(0);
+  await middleFunction(_temp);
+  await dbInstance.close();
   console.log("Connection closed");
-  return;
+  return Promise.resolve();
 }
-start()
