@@ -24,23 +24,26 @@ const processData = () => {
   return dbInstance.execute(sql, binds, { autoCommit: true });
 }
 
-async function middleFunction(array = [], maxRequest = 2, failedRequests = []) {
+async function middleFunction(totalRecords = 100000000, maxRequest = 100, currentRecursionIteration = 1, failedRequests = []) {
   try {
-    const _array = array.splice(0, maxRequest);
-    const _promises = _array.map((_data, ind) => {
-      return processData().catch((e) => {
+    const recordsToDump = Math.min(maxRequest, totalRecords);
+    const _promises = []
+
+    for (let i = 0; i < recordsToDump; i++) {
+      _promises.push(processData().catch((e) => {
         failedRequests.push({
-          // dbInstance: userSetting._id.toString(),
-          index: ind,
+          index: (currentRecursionIteration - 1) * maxRequest + i + 1,
           error: e,
         });
-      });
-    });
+      }));
+    }
+
     const result = await Promise.all(_promises);
     console.log("result", result);
+    totalRecords = Math.abs(totalRecords - recordsToDump);
 
-    if (array && array.length) {
-      await middleFunction(array, maxRequest, failedRequests);
+    if (totalRecords) {
+      await middleFunction(totalRecords, maxRequest, currentRecursionIteration + 1, failedRequests);
     }
 
     return Promise.resolve(failedRequests);
@@ -54,8 +57,9 @@ const start = async () => {
     console.log("Connection to db failed");
     return Promise.resolve();
   }
-  const _temp = new Array(7).fill(0);
-  await middleFunction(_temp);
+  // const totalRecords = 100000000; // 10 crore
+  // await middleFunction(totalRecords);
+  await middleFunction();
   await dbInstance.close();
   console.log("Connection closed");
   return Promise.resolve();
