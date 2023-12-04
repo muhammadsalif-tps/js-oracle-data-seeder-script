@@ -1,6 +1,7 @@
 const oracledb = require('oracledb');
 require('dotenv').config();
 const { faker } = require('@faker-js/faker');
+const jsonData = require("./jsonData.json")
 
 let dbInstance = null
 const dbConfig = {
@@ -14,70 +15,85 @@ oracledb.getConnection(dbConfig).then((_db) => {
   start();
 });
 
-const processData = () => {
-  const inputData = {
-    id: faker.number.int({ min: 10, max: 100 }),
-    order_id: faker.string.sample({ min: 5, max: 6 }),
-    transaction_id: faker.string.sample({ min: 5, max: 6 }),
-    transaction_type: faker.string.sample({ min: 5, max: 6 }),
-    service_number: faker.string.sample({ min: 5, max: 6 }),
-    customerid: faker.string.sample({ min: 5, max: 6 }),
-    qidcrn: faker.string.sample({ min: 5, max: 6 }),
-    account_number: faker.string.sample({ min: 5, max: 6 }),
-    email_address: faker.string.sample({ min: 5, max: 6 }),
-    ip_address: faker.string.sample({ min: 5, max: 6 }),
-    channel: faker.string.sample({ min: 5, max: 6 }),
-    subchannel: faker.string.sample({ min: 5, max: 6 }),
-    service_type: faker.string.sample({ min: 5, max: 6 }),
-    amount: faker.string.sample({ min: 5, max: 6 }),
-    commission_amount: faker.string.sample({ min: 5, max: 6 }),
-    vat: faker.string.sample({ min: 5, max: 6 }),
-    status: faker.string.sample({ min: 5, max: 6 }),
-    transaction_status: faker.string.sample({ min: 5, max: 6 }),
-    bank_status: faker.string.sample({ min: 5, max: 6 }),
-    fullfillment_responsecode: faker.string.sample({ min: 5, max: 6 }),
-    fullfillment_status: faker.string.sample({ min: 5, max: 6 }),
-    bank_description: faker.string.sample({ min: 5, max: 6 }),
-    pg_description: faker.string.sample({ min: 5, max: 6 }),
+const createData = () => {
+  const dataObj = {
+    card_scheme: jsonData["cardScheme"][Math.floor(Math.random() * [jsonData["cardScheme"].length])],
+    instrument_type: jsonData["instrumentType"][Math.floor(Math.random() * [jsonData["instrumentType"].length])],
+    transaction_type: jsonData["transactionType"][Math.floor(Math.random() * [jsonData["transactionType"].length])],
+    subchannel: jsonData["subChannel"][Math.floor(Math.random() * [jsonData["subChannel"].length])],
+    merchant_id: jsonData["merchantId"][Math.floor(Math.random() * [jsonData["merchantId"].length])],
+    transaction_status: jsonData["transactionStatusCodes"][Math.floor(Math.random() * [jsonData["transactionStatusCodes"].length])],
+    mid: jsonData["MID"][Math.floor(Math.random() * [jsonData["MID"].length])],
+    stages: jsonData["stages"][Math.floor(Math.random() * [jsonData["stages"].length])]
+  }
+  const data = {
+    id: faker.number.int({ min: 10, max: 100000 }),
+    order_id: `${dataObj.merchant_id}${faker.number.int()}`,
+    transaction_id: `${dataObj.merchant_id}${faker.number.int()}`,
+    transaction_type: dataObj.transaction_type,
+    service_number: `${faker.number.int()}`,
+    customerid: `${faker.number.int()}`,
+    qidcrn: `${faker.number.int()}`,
+    account_number: `${faker.number.int({ min: 10000000000, max: 99999999999 })}`,
+    email_address: faker.internet.email(),
+    ip_address: faker.internet.ipv4(),
+    channel: jsonData['channel'][dataObj.subchannel],
+    subchannel: dataObj.subchannel,
+    service_type: "DirectTopup",
+    amount: faker.number.float({ min: 10000, max: 10000000, precision: 0.001 }),
+    commission_amount: null,
+    vat: null,
+    status: jsonData["transactionStatus"][dataObj.transaction_status],
+    transaction_status: dataObj.transaction_status,
+    bank_status: jsonData["transactionStatus"][dataObj.transaction_status],
+    fullfillment_responsecode: null,
+    fullfillment_status: jsonData["transactionStatus"][dataObj.transaction_status],
+    bank_description: null,
+    pg_description: null,
     payment_datetime: faker.date.between({ from: '2020-01-01T00:00:00.000Z', to: '2030-01-01T00:00:00.000Z' }), // '2026-05-16T02:22:53.002Z'
     fullfillment_datetime: faker.date.between({ from: '2020-01-01T00:00:00.000Z', to: '2030-01-01T00:00:00.000Z' }), // '2026-05-16T02:22:53.002Z'
     refund_datetime: faker.date.between({ from: '2020-01-01T00:00:00.000Z', to: '2030-01-01T00:00:00.000Z' }), // '2026-05-16T02:22:53.002Z'
     orphan_datetime: faker.date.between({ from: '2020-01-01T00:00:00.000Z', to: '2030-01-01T00:00:00.000Z' }), // '2026-05-16T02:22:53.002Z'
-    pgw_payment_type: faker.string.sample({ min: 5, max: 6 }),
-    payment_mode: faker.string.sample({ min: 5, max: 6 }),
-    card_number: faker.string.sample({ min: 5, max: 6 }),
-    card_scheme: faker.string.sample({ min: 5, max: 6 }),
-    card_expiry: faker.string.sample({ min: 5, max: 6 }),
-    card_holdername: faker.string.sample({ min: 5, max: 6 }),
-    issuer_bank: faker.string.sample({ min: 5, max: 6 }),
-    dpan: faker.string.sample({ min: 5, max: 6 }),
-    funding_method: faker.string.sample({ min: 5, max: 6 }),
-    mid: faker.string.sample({ min: 5, max: 6 }),
-    merchant_id: faker.string.sample({ min: 5, max: 6 }),
-    sub_merchant_id: faker.string.sample({ min: 5, max: 6 }),
-    currency: faker.string.sample({ min: 1, max: 3 }),
-    firstname: faker.string.sample({ min: 5, max: 6 }),
-    lastname: faker.string.sample({ min: 5, max: 6 }),
-    rrn: faker.string.sample({ min: 5, max: 6 }),
-    stan: faker.string.sample({ min: 5, max: 6 }),
-    acquirer_code: faker.string.sample({ min: 5, max: 6 }),
-    authcode: faker.string.sample({ min: 5, max: 6 }),
-    card_acceptor_terminal_id: faker.string.sample({ min: 5, max: 6 }),
-    inserted_by: faker.string.sample({ min: 5, max: 6 }),
-    modified_by: faker.string.sample({ min: 5, max: 6 }),
+    pgw_payment_type: dataObj.instrument_type,
+    payment_mode: "OREEDOSERVICE",
+    card_number: null,
+    card_scheme: dataObj.card_scheme,
+    card_expiry: `${new Date().getMonth()}/${new Date().getFullYear()}`,
+    card_holdername: faker.person.firstName(),
+    issuer_bank: "QNB",
+    dpan: null,
+    funding_method: null,
+    mid: dataObj.mid,
+    merchant_id: dataObj.merchant_id,
+    sub_merchant_id: `${dataObj.merchant_id}-${dataObj.transaction_type}`,
+    currency: `QAR`,
+    firstname: faker.person.firstName(),
+    lastname: faker.person.lastName(),
+    rrn: `${faker.number.int({ min: 10000000000000, max: 99999999999999 })}`,
+    stan: `${faker.number.int({ min: 100000, max: 999999 })}`,
+    acquirer_code: `00`,
+    authcode: `${faker.number.int({ min: 10000, max: 999999 })}`,
+    card_acceptor_terminal_id: "TESTORPRQNB01",
+    inserted_by: null,
+    modified_by: null,
     initiate_datetime: faker.date.between({ from: '2020-01-01T00:00:00.000Z', to: '2030-01-01T00:00:00.000Z' }), // '2026-05-16T02:22:53.002Z'
     modified_datetime: faker.date.between({ from: '2020-01-01T00:00:00.000Z', to: '2030-01-01T00:00:00.000Z' }), // '2026-05-16T02:22:53.002Z'
-    instrument_type: faker.string.sample({ min: 5, max: 6 }),
-    response_code: faker.string.sample({ min: 5, max: 6 }),
-    stage1_status: faker.string.sample({ min: 5, max: 6 }),
-    stage2_status: faker.string.sample({ min: 5, max: 6 }),
-    stage3_status: faker.string.sample({ min: 5, max: 6 }),
-    stage4_status: faker.string.sample({ min: 5, max: 6 }),
+    instrument_type: dataObj.instrument_type,
+    response_code: jsonData["transactionStatusXresponseCode"][dataObj.transaction_status],
+    stage1_status: dataObj.stages,
+    stage2_status: dataObj.stages === "0000" ? "0000" : null,
+    stage3_status: dataObj.stages === "0000" ? "0000" : null,
+    stage4_status: dataObj.stages === "0000" ? "0000" : null,
     stage1_status_datetime: faker.date.between({ from: '2020-01-01T00:00:00.000Z', to: '2030-01-01T00:00:00.000Z' }), // '2026-05-16T02:22:53.002Z'
     stage2_status_datetime: faker.date.between({ from: '2020-01-01T00:00:00.000Z', to: '2030-01-01T00:00:00.000Z' }), // '2026-05-16T02:22:53.002Z'
     stage3_status_datetime: faker.date.between({ from: '2020-01-01T00:00:00.000Z', to: '2030-01-01T00:00:00.000Z' }), // '2026-05-16T02:22:53.002Z'
     stage4_status_datetime: faker.date.between({ from: '2020-01-01T00:00:00.000Z', to: '2030-01-01T00:00:00.000Z' }) // '2026-05-16T02:22:53.002Z'
   };
+  return data;
+}
+
+const processData = () => {
+  const inputData = createData();
   const sql = `INSERT INTO IRIS_CUSTOM.ODS_TRANSACTION_LOG_2 
               (
                 ID,
@@ -207,30 +223,46 @@ const processData = () => {
                 :stage4_status_datetime               
               )`;
   const binds = { ...inputData };
-  return dbInstance.execute(sql, binds, { autoCommit: true });
+  // return dbInstance.execute(sql, binds, { autoCommit: true });
 }
 
-async function middleFunction(totalRecords = 100000, maxRequest = 10, currentRecursionIteration = 1, failedRequests = []) {
+function calculateTimePassed(startTime, endTime) {
+  const timeDiff = endTime - startTime;
+  const seconds = Math.floor(timeDiff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  return `${minutes} minutes and ${seconds % 60} seconds`;
+}
+
+async function middleFunction(
+  totalRecords = 10000000,
+  maxRequest = 1000,
+  dataInserted = 0,
+  failedRequests = [],
+  startTime = new Date()
+) {
   try {
+    console.log("records remaining to insert", totalRecords)
     const recordsToDump = Math.min(maxRequest, totalRecords);
     const _promises = []
 
     for (let i = 0; i < recordsToDump; i++) {
       _promises.push(processData().catch((e) => {
         failedRequests.push({
-          index: (currentRecursionIteration - 1) * maxRequest + i + 1,
+          index: (dataInserted - 1) * maxRequest + i + 1,
           error: e,
         });
       }));
     }
 
     await Promise.all(_promises);
-    console.log("currentRecursionIteration", currentRecursionIteration);
-    console.log("DUMP==>", recordsToDump);
+    dataInserted += _promises.length;
+    console.log("Data inserted", dataInserted);
     totalRecords = Math.abs(totalRecords - recordsToDump);
-
+    const timePassed = calculateTimePassed(startTime, new Date());
+    console.log(`Time passed: ${timePassed}`);
+    console.log("<===============================>")
     if (totalRecords) {
-      await middleFunction(totalRecords, maxRequest, currentRecursionIteration + 1, failedRequests);
+      await middleFunction(totalRecords, maxRequest, dataInserted, failedRequests, startTime);
     }
 
     return Promise.resolve(failedRequests);
@@ -244,9 +276,9 @@ const start = async () => {
     console.log("Connection to db failed");
     return Promise.resolve();
   }
-  // const totalRecords = 100000000; // 10 crore
-  // await middleFunction(totalRecords);
-  await middleFunction();
+  console.log("database connected");
+  const totalRecords = 10000000; // 1 crore
+  await middleFunction(totalRecords);
   await dbInstance.close();
   console.log("Connection closed");
   return Promise.resolve();

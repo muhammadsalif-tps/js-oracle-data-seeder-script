@@ -1,0 +1,112 @@
+{
+  "instrumentType": [
+    "PAYONE",
+    "SECURECHECKOUT",
+    "LOYALTY",
+    "OMONEY",
+    "MPGS",
+    "APPLEPAY",
+    "GOOGLEPAY",
+    "SAMSUNGPAY"
+  ],
+  "transactionType": [
+    "BILLPAYMENT",
+    "TOPUP",
+    "ESHOP"
+  ],
+  "subChannel": [
+    "App",
+    "App",
+    "App",
+    "App",
+    "MPortal",
+    "MPortal",
+    "MPortal",
+    "IVR"
+  ],
+  "merchantId": [
+    "App",
+    "MPortal",
+    "IVR"
+  ],
+  "transactionStatusCodes": [
+    "0000",
+    "11",
+    "12",
+    "9999",
+    "8888",
+    "0000",
+    "0000",
+    "0000",
+    "0000"
+  ],
+  "cardScheme": [
+    "Visa",
+    "MasterCard",
+    "PayPak",
+    "UnionPay"
+  ],
+  "MID": [
+    "mid1",
+    "mid2",
+    "mid3",
+    "mid4",
+    "mid5",
+    "mid6"
+  ],
+  "channel": {
+    "App": "01",
+    "MPortal": "02",
+    "IVR": "03"
+  },
+  "transactionStatus": {
+    "0000": "COMPLETED",
+    "11": "PENDING",
+    "12": "AUTHORISED",
+    "9999": "FAILED",
+    "8888": "REFUNDED"
+  },
+  "transactionStatusXresponseCode": {
+    "0000": "000",
+    "11": "011",
+    "12": "012",
+    "9999": "999",
+    "8888": "088"
+  },
+  "fullfillmentStatus": {
+    "0000": "SUCCESS",
+    "9999": "FAILURE"
+  },
+  "stages": [
+    "0000",
+    "010",
+    "157",
+    "691",
+    "001",
+    "046",
+    "003",
+    "004",
+    "005",
+    "025",
+    "058",
+    "075",
+    "173",
+    "9999"
+  ],
+  "statusCodes": {
+    "0000": "RESPONSE_SUCCESS",
+    "010": "RESPONSE_DUPLICATE_TRANSACTION",
+    "157": "RESPONSE_INVALID_HASH",
+    "691": "INVALID_TXN",
+    "001": "RESPONSE_LIMIT_EXCEEDED",
+    "046": "RESPONSE_FAILURE",
+    "003": "RESPONSE_ACCOUNT_INACTIVE",
+    "004": "RESPONSE_LOW_BALANCE",
+    "005": "RESPONSE_INVALID_CARD",
+    "025": "RESPONSE_CARD_EXPIRED",
+    "058": "RESPONSE_ISSUER_TIMEOUT",
+    "075": "RESPONSE_INVALID_CARD_NUMBER",
+    "173": "INVALID_TXN_SECURITY_CODE",
+    "9999": "RESPONSE_INVALID_REQUEST"
+  }
+}
