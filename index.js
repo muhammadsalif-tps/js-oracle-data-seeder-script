@@ -13,6 +13,8 @@ const dbConfig = {
 oracledb.getConnection(dbConfig).then((_db) => {
   dbInstance = _db;
   start();
+}).catch((error) => {
+  console.log("error in connection with db", error)
 });
 
 const createData = () => {
@@ -24,12 +26,13 @@ const createData = () => {
     merchant_id: jsonData["merchantId"][Math.floor(Math.random() * [jsonData["merchantId"].length])],
     transaction_status: jsonData["transactionStatusCodes"][Math.floor(Math.random() * [jsonData["transactionStatusCodes"].length])],
     mid: jsonData["MID"][Math.floor(Math.random() * [jsonData["MID"].length])],
-    stages: jsonData["stages"][Math.floor(Math.random() * [jsonData["stages"].length])]
+    stages: jsonData["stages"][Math.floor(Math.random() * [jsonData["stages"].length])],
+    order_transaction_id: jsonData["merchantId"][Math.floor(Math.random() * [jsonData["merchantId"].length])]
   }
   const data = {
     id: faker.number.int({ min: 10, max: 100000 }),
-    order_id: `${dataObj.merchant_id}${faker.number.int()}`,
-    transaction_id: `${dataObj.merchant_id}${faker.number.int()}`,
+    order_id: `${dataObj.order_transaction_id}`,
+    transaction_id: `${dataObj.order_transaction_id}`,
     transaction_type: dataObj.transaction_type,
     service_number: `${faker.number.int()}`,
     customerid: `${faker.number.int()}`,
@@ -94,7 +97,7 @@ const createData = () => {
 
 const processData = () => {
   const inputData = createData();
-  const sql = `INSERT INTO IRIS_CUSTOM.ODS_TRANSACTION_LOG_2 
+  const sql = `INSERT INTO IRIS_CUSTOM.TRANSACTION_LOG_V2 
               (
                 ID,
                 ORDER_ID,
@@ -223,7 +226,7 @@ const processData = () => {
                 :stage4_status_datetime               
               )`;
   const binds = { ...inputData };
-  // return dbInstance.execute(sql, binds, { autoCommit: true });
+  return dbInstance.execute(sql, binds, { autoCommit: true });
 }
 
 function calculateTimePassed(startTime, endTime) {
@@ -234,8 +237,8 @@ function calculateTimePassed(startTime, endTime) {
 }
 
 async function middleFunction(
-  totalRecords = 10000000,
-  maxRequest = 1000,
+  totalRecords = 100000000,
+  maxRequest = 10000,
   dataInserted = 0,
   failedRequests = [],
   startTime = new Date()
@@ -277,8 +280,7 @@ const start = async () => {
     return Promise.resolve();
   }
   console.log("database connected");
-  const totalRecords = 10000000; // 1 crore
-  await middleFunction(totalRecords);
+  await middleFunction();
   await dbInstance.close();
   console.log("Connection closed");
   return Promise.resolve();
